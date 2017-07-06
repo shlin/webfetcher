@@ -3,11 +3,12 @@ package org.pstar.webfetcher.web.judicial.fjud.ui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -28,8 +29,8 @@ import javax.swing.border.EmptyBorder;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
-import org.json.JSONArray;
 import org.pstar.webfetcher.formatter.DateLabelFormatter;
+import org.pstar.webfetcher.web.judicial.fjud.controller.FJUDCtrlViewerImpl;
 
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -37,45 +38,184 @@ import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
 public class AppWindow {
-
-	private ResourceBundle resource;
-	private JFrame frame;
-	private JLabel lblFJUDTitleExclude;
-	private JLabel label;
-	private CheckBoxList jListCourt;
-	private JButton btnStop;
-	private JButton btnStart;
-	private JProgressBar progressBar;
-	private JTextField txtFilePath;
 	private JButton btnChoiceFile;
-	private ButtonGroup btnGOutputType;
-	private JTextField txtMySQLHost;
-	private JTextField txtMySQLUser;
-	private JPasswordField txtMySQLPassword;
+
+	private JButton btnStart;
+	private JButton btnStop;
+	private JDatePickerImpl dateEndPicker;
+	private Properties datePickerProperties;
+	private JDatePickerImpl dateStartPicker;
+	private FJUDCtrlViewerImpl fjudFormListener;
+	private JFrame frame;
+	private CheckBoxList jListCourt;
+	private JLabel lblFJUDTitleExclude;
+	private JList<String> listFJUDList;
+	private JProgressBar progressBarCourts;
+	private JSpinner spinnerFetchTimeInterval;
 	private JTextField txtDatabaseName;
-	private JTextField txtTableName;
+	private JTextField txtFilePath;
+	private JTextPane txtFJUDContent;
 	private JTextField txtFJUDTitle;
 	private JTextField txtFJUDTitleExclude;
 	private JTextField txtFulltextKeyword;
-	private JSpinner spinnerFetchTimeInterval;
-	private JList<String> listFJUDList;
-	private JTextPane txtFJUDContent;
-	private Properties datePickerProperties;
-	private JDatePickerImpl dateStartPicker;
-	private JDatePickerImpl dateEndPicker;
+	private JTextField txtMySQLHost;
+	private JPasswordField txtMySQLPassword;
+	private JTextField txtMySQLUser;
+	private JTextField txtTableName;
+	private JProgressBar progressBarDocs;
 
 	/**
 	 * Create the application.
 	 */
-	public AppWindow(ResourceBundle resource) {
-		this.resource = resource;
+	public AppWindow(FJUDCtrlViewerImpl listener) {
+		this.fjudFormListener = listener;
 
 		this.initTheme();
 		this.initDatePickerProperties();
 		this.initialize();
 		this.frame.setVisible(true);
 	}
-	
+
+	/**
+	 * @return the btnChoiceFile
+	 */
+	public JButton getBtnChoiceFile() {
+		return btnChoiceFile;
+	}
+
+	/**
+	 * @return the btnStart
+	 */
+	public JButton getBtnStart() {
+		return btnStart;
+	}
+
+	/**
+	 * @return the btnStop
+	 */
+	public JButton getBtnStop() {
+		return btnStop;
+	}
+
+	/**
+	 * @return the dateEndPicker
+	 */
+	public JDatePickerImpl getDateEndPicker() {
+		return dateEndPicker;
+	}
+
+	/**
+	 * @return the dateStartPicker
+	 */
+	public JDatePickerImpl getDateStartPicker() {
+		return dateStartPicker;
+	}
+
+	/**
+	 * @return the jListCourt
+	 */
+	public CheckBoxList getjListCourt() {
+		return jListCourt;
+	}
+
+	/**
+	 * @return the lblFJUDTitleExclude
+	 */
+	public JLabel getLblFJUDTitleExclude() {
+		return lblFJUDTitleExclude;
+	}
+
+	/**
+	 * @return the listFJUDList
+	 */
+	public JList<String> getListFJUDList() {
+		return listFJUDList;
+	}
+
+	/**
+	 * @return the progressBar
+	 */
+	public JProgressBar getProgressBar() {
+		return progressBarCourts;
+	}
+
+	/**
+	 * @return the spinnerFetchTimeInterval
+	 */
+	public JSpinner getSpinnerFetchTimeInterval() {
+		return spinnerFetchTimeInterval;
+	}
+
+	/**
+	 * @return the txtDatabaseName
+	 */
+	public JTextField getTxtDatabaseName() {
+		return txtDatabaseName;
+	}
+
+	/**
+	 * @return the txtFilePath
+	 */
+	public JTextField getTxtFilePath() {
+		return txtFilePath;
+	}
+
+	/**
+	 * @return the txtFJUDContent
+	 */
+	public JTextPane getTxtFJUDContent() {
+		return txtFJUDContent;
+	}
+
+	/**
+	 * @return the txtFJUDTitle
+	 */
+	public JTextField getTxtFJUDTitle() {
+		return txtFJUDTitle;
+	}
+
+	/**
+	 * @return the txtFJUDTitleExclude
+	 */
+	public JTextField getTxtFJUDTitleExclude() {
+		return txtFJUDTitleExclude;
+	}
+
+	/**
+	 * @return the txtFulltextKeyword
+	 */
+	public JTextField getTxtFulltextKeyword() {
+		return txtFulltextKeyword;
+	}
+
+	/**
+	 * @return the txtMySQLHost
+	 */
+	public JTextField getTxtMySQLHost() {
+		return txtMySQLHost;
+	}
+
+	/**
+	 * @return the txtMySQLPassword
+	 */
+	public JPasswordField getTxtMySQLPassword() {
+		return txtMySQLPassword;
+	}
+
+	/**
+	 * @return the txtMySQLUser
+	 */
+	public JTextField getTxtMySQLUser() {
+		return txtMySQLUser;
+	}
+
+	/**
+	 * @return the txtTableName
+	 */
+	public JTextField getTxtTableName() {
+		return txtTableName;
+	}
+
 	private void initDatePickerProperties() {
 		this.datePickerProperties = new Properties();
 
@@ -83,25 +223,6 @@ public class AppWindow {
 		this.datePickerProperties.put("text.month", "月");
 		this.datePickerProperties.put("text.year", "年");
 		this.datePickerProperties.put("text.clear", "清除");
-	}
-
-	private void initTheme() {
-		try {
-			for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		} catch (ClassNotFoundException ex) {
-			java.util.logging.Logger.getLogger(AppWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (InstantiationException ex) {
-			java.util.logging.Logger.getLogger(AppWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
-			java.util.logging.Logger.getLogger(AppWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(AppWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		}
 	}
 
 	/**
@@ -112,22 +233,50 @@ public class AppWindow {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setBounds(100, 100, 800, 750);
 		frame.getContentPane()
-				.setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("5px"),
-						ColumnSpec.decode("right:150px"), ColumnSpec.decode("left:200px:grow"),
-						ColumnSpec.decode("5px"), ColumnSpec.decode("450px:grow"), ColumnSpec.decode("5px"), },
-						new RowSpec[] { FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
-								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
-								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
-								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
-								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
-								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, RowSpec.decode("100px:grow"),
-								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
-								FormSpecs.DEFAULT_ROWSPEC, }));
+				.setLayout(new FormLayout(new ColumnSpec[] {
+				ColumnSpec.decode("5px"),
+				ColumnSpec.decode("right:150px"),
+				ColumnSpec.decode("left:200px"),
+				ColumnSpec.decode("5px"),
+				ColumnSpec.decode("400px:grow"),
+				ColumnSpec.decode("5px"),},
+			new RowSpec[] {
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				RowSpec.decode("100px:grow"),
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,}));
 
 		JLabel lblOutputType = new JLabel("輸出方式：");
 		frame.getContentPane().add(lblOutputType, "2, 2");
@@ -137,11 +286,11 @@ public class AppWindow {
 		frame.getContentPane().add(panel, "3, 2, fill, fill");
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-		btnGOutputType = new ButtonGroup();
+		ButtonGroup btnGOutputType = new ButtonGroup();
 		ActionListener outputTypeActListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				doChangeOutputType("1".equals(e.getActionCommand()));
+				fjudFormListener.doChangeOutputType("1".equals(e.getActionCommand()));
 			}
 		};
 
@@ -280,46 +429,90 @@ public class AppWindow {
 		spinnerFetchTimeInterval.setModel(new SpinnerNumberModel(3, 1, 100, 1));
 		frame.getContentPane().add(spinnerFetchTimeInterval, "3, 28, left, center");
 
-		label = new JLabel("法院名稱：");
-		frame.getContentPane().add(label, "2, 30, left, default");
+		JLabel lblCourtList = new JLabel("法院名稱：");
+		frame.getContentPane().add(lblCourtList, "2, 30, left, default");
 
 		jListCourt = new CheckBoxList();
-		jListCourt.setModel(creatCourtListModel());
+		jListCourt.setModel(this.fjudFormListener.getCourtListModel());
 
 		JScrollPane courtListScrollPane = new JScrollPane(jListCourt);
 		frame.getContentPane().add(courtListScrollPane, "2, 32, 2, 1, fill, fill");
 
 		btnStop = new JButton("停止");
+		btnStop.setEnabled(false);
+		btnStop.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (btnStop.isEnabled()) {
+					fjudFormListener.doStop();
+					btnStop.setEnabled(false);
+					btnStart.setEnabled(true);
+				}
+			}
+		});
 		frame.getContentPane().add(btnStop, "2, 34");
 
 		btnStart = new JButton("開始");
+		btnStart.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (btnStart.isEnabled()) {
+					btnStart.setEnabled(false);
+					btnStop.setEnabled(true);
+					fjudFormListener.doFetch();
+				}
+			}
+		});
 		frame.getContentPane().add(btnStart, "3, 34");
+		
+		JLabel label = new JLabel("完成進度（法院）：");
+		frame.getContentPane().add(label, "2, 36");
 
-		progressBar = new JProgressBar();
-		progressBar.setStringPainted(true);
-		frame.getContentPane().add(progressBar, "2, 36, 4, 1");
+		progressBarCourts = new JProgressBar();
+		progressBarCourts.setStringPainted(true);
+		frame.getContentPane().add(progressBarCourts, "3, 36, fill, center");
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBorder(new EmptyBorder(0, 0, 0, 0));
+		frame.getContentPane().add(panel_1, "5, 36, fill, fill");
+		panel_1.setLayout(new FormLayout(new ColumnSpec[] {
+				ColumnSpec.decode("right:200px"),
+				ColumnSpec.decode("left:default:grow"),},
+			new RowSpec[] {
+				FormSpecs.DEFAULT_ROWSPEC,}));
+		
+		JLabel lblProgressBarDocs = new JLabel("完成進度（單一法院裁判書）：");
+		panel_1.add(lblProgressBarDocs, "1, 1");
+		
+		progressBarDocs = new JProgressBar();
+		progressBarDocs.setStringPainted(true);
+		panel_1.add(progressBarDocs, "2, 1, fill, default");
+	}
+
+	private void initTheme() {
+		try {
+			for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
+				}
+			}
+		} catch (ClassNotFoundException ex) {
+			java.util.logging.Logger.getLogger(AppWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		} catch (InstantiationException ex) {
+			java.util.logging.Logger.getLogger(AppWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		} catch (IllegalAccessException ex) {
+			java.util.logging.Logger.getLogger(AppWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
+			java.util.logging.Logger.getLogger(AppWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		}
 	}
 
 	/**
-	 * @param actionCommand
-	 *            "0" for sql , "1" for mysql
+	 * @param fjudFormListener
+	 *            the fjudFormListener to set
 	 */
-	private void doChangeOutputType(boolean type) {
-		this.txtFilePath.setEnabled(!type);
-		this.btnChoiceFile.setEnabled(!type);
-		this.txtMySQLHost.setEnabled(type);
-		this.txtMySQLUser.setEnabled(type);
-		this.txtMySQLPassword.setEnabled(type);
-	}
-
-	private DefaultListModel<CheckBoxListEntry> creatCourtListModel() {
-		DefaultListModel<CheckBoxListEntry> jListCourtModel = new DefaultListModel<CheckBoxListEntry>();
-		JSONArray courts = new JSONArray(this.resource.getString("Courts"));
-
-		courts.forEach(court -> {
-			jListCourtModel.addElement(new CheckBoxListEntry(court, false));
-		});
-
-		return jListCourtModel;
+	public void setFjudFormListener(FJUDCtrlViewerImpl fjudFormListener) {
+		this.fjudFormListener = fjudFormListener;
 	}
 }

@@ -5,5 +5,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jgoodies-1.8.0"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jdatepicker-1.3.4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/json-20170516"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jsoup-1.10.3"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
