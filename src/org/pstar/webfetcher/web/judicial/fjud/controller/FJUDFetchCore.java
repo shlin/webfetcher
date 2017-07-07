@@ -1,5 +1,8 @@
 package org.pstar.webfetcher.web.judicial.fjud.controller;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,7 +14,9 @@ import javax.swing.SwingUtilities;
 
 import org.json.JSONArray;
 import org.pstar.webfetcher.core.FetchCore;
-import org.pstar.webfetcher.web.judicial.fjud.model.Judical;
+import org.pstar.webfetcher.jdbc.mysql.MySQLConnector;
+import org.pstar.webfetcher.web.judicial.fjud.model.Judicial;
+import org.pstar.webfetcher.web.judicial.fjud.model.JudicialDAO;
 import org.pstar.webfetcher.web.judicial.fjud.ui.AppWindow;
 import org.pstar.webfetcher.web.judicial.fjud.ui.CheckBoxListEntry;
 
@@ -20,8 +25,12 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 	private ResourceBundle resource;
 	private FJUDFetchTask currentThread;
 	private HashMap<String, String> cookies;
-	private HashMap<String, Judical> recordMap;
+	private HashMap<String, Judicial> recordMap;
 	private DefaultListModel<String> recordListModel;
+	private MySQLConnector mysql;
+	private JudicialDAO judicialDAO;
+	private boolean outputMySQL;
+	private PrintStream outputFile;
 
 	public FJUDFetchCore() {
 		this.initResource();
@@ -34,9 +43,37 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 		this.resource = ResourceBundle.getBundle("org.pstar.webfetcher.web.judicial.fjud.config");
 	}
 
+	private void initMySQL() {
+		String host = this.appWindow.getTxtMySQLHost().getText().trim();
+		String user = this.appWindow.getTxtMySQLUser().getText().trim();
+		String password = String.valueOf(this.appWindow.getTxtMySQLPassword().getPassword()).trim();
+		String database = this.appWindow.getTxtDatabaseName().getText().trim();
+		String table = this.appWindow.getTxtTableName().getText().trim();
+
+		this.mysql = new MySQLConnector(host, user, password, database);
+		this.judicialDAO = new JudicialDAO(this.mysql, table);
+		this.judicialDAO.createTable();
+	}
+
+	private void initFile() {
+		try {
+			String table = this.appWindow.getTxtTableName().getText().trim();
+			this.judicialDAO = new JudicialDAO(table);
+			this.outputFile = new PrintStream(new FileOutputStream(this.appWindow.getTxtFilePath().getText()));
+			this.outputFile.println(this.judicialDAO.createTableToFile());
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public void doFetch() {
-		this.recordMap = new HashMap<String, Judical>();
+		if (this.outputMySQL)
+			this.initMySQL();
+		else
+			this.initFile();
+
+		this.recordMap = new HashMap<String, Judicial>();
 		this.recordListModel = new DefaultListModel<String>();
 		this.currentThread = new FJUDFetchTask(this);
 		this.currentThread.start();
@@ -49,11 +86,13 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 
 	@Override
 	public void doChangeOutputType(boolean type) {
+		this.outputMySQL = type;
 		this.appWindow.getTxtFilePath().setEnabled(!type);
 		this.appWindow.getBtnChoiceFile().setEnabled(!type);
 		this.appWindow.getTxtMySQLHost().setEnabled(type);
 		this.appWindow.getTxtMySQLUser().setEnabled(type);
 		this.appWindow.getTxtMySQLPassword().setEnabled(type);
+		this.appWindow.getTxtDatabaseName().setEnabled(type);
 	}
 
 	@Override
@@ -124,10 +163,16 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 	}
 
 	@Override
-	public void addRecord(Judical record) {
+	public void addRecord(Judicial record) {
 		this.recordMap.put(record.getUUID(), record);
 		this.recordListModel.addElement(record.getSummary());
 		this.appWindow.getListFJUDList().setModel(this.recordListModel);
+
+		if (this.outputMySQL)
+			this.judicialDAO.saveDataToMySQL(record);
+		else {
+			this.outputFile.println(this.judicialDAO.saveDataToFile(record));
+		}
 	}
 
 	@Override

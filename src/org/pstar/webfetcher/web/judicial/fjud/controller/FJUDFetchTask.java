@@ -6,7 +6,7 @@ import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
-import org.pstar.webfetcher.web.judicial.fjud.model.Judical;
+import org.pstar.webfetcher.web.judicial.fjud.model.Judicial;
 
 public class FJUDFetchTask extends Thread {
 	private boolean enable;
@@ -65,7 +65,7 @@ public class FJUDFetchTask extends Thread {
 							String content = String.format("【裁判字號】 %s\n【裁判日期】 %s\n【裁判案由】 %s\n【裁判全文】\n%s", judId, date,
 									judTitle, table.text());
 
-							this.fjudFetchCtrl.addRecord(new Judical(court, date, judId, judTitle, content));
+							this.fjudFetchCtrl.addRecord(new Judicial(court, date, judId, judTitle, content));
 
 							this.sleep();
 						} else

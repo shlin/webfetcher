@@ -10,6 +10,7 @@ import java.util.Properties;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -41,7 +42,7 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class AppWindow {
 	private JButton btnChoiceFile;
-
+	private JFileChooser fc;
 	private JButton btnStart;
 	private JButton btnStop;
 	private JDatePickerImpl dateEndPicker;
@@ -65,6 +66,7 @@ public class AppWindow {
 	private JTextField txtMySQLUser;
 	private JTextField txtTableName;
 	private JProgressBar progressBarDocs;
+	private ButtonGroup btnGOutputType;
 
 	/**
 	 * Create the application.
@@ -260,7 +262,7 @@ public class AppWindow {
 		frame.getContentPane().add(panel, "3, 2, fill, fill");
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-		ButtonGroup btnGOutputType = new ButtonGroup();
+		btnGOutputType = new ButtonGroup();
 		ActionListener outputTypeActListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -308,9 +310,20 @@ public class AppWindow {
 		panelSQLFile.add(txtFilePath, "1, 1, fill, center");
 		txtFilePath.setColumns(10);
 
+		fc = new JFileChooser();
+
 		btnChoiceFile = new JButton("選擇檔案");
 		btnChoiceFile.setEnabled(false);
 		panelSQLFile.add(btnChoiceFile, "2, 1, center, center");
+		btnChoiceFile.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (btnChoiceFile.isEnabled()) {
+					fc.showSaveDialog(btnChoiceFile);
+					txtFilePath.setText(fc.getSelectedFile().getAbsolutePath());
+				}
+			}
+		});
 
 		JLabel lblMySQLHost = new JLabel("MySQL 伺服器：");
 		frame.getContentPane().add(lblMySQLHost, "2, 6, right, default");
@@ -343,6 +356,7 @@ public class AppWindow {
 		frame.getContentPane().add(lblTableName, "2, 14, right, default");
 
 		txtTableName = new JTextField();
+		txtTableName.setEditable(false);
 		txtTableName.setText("judicial");
 		frame.getContentPane().add(txtTableName, "3, 14, fill, default");
 		txtTableName.setColumns(10);
@@ -469,6 +483,13 @@ public class AppWindow {
 		progressBarDocs = new JProgressBar();
 		progressBarDocs.setStringPainted(true);
 		panel_1.add(progressBarDocs, "2, 1, fill, default");
+	}
+
+	/**
+	 * @return the btnGOutputType
+	 */
+	public ButtonGroup getBtnGOutputType() {
+		return btnGOutputType;
 	}
 
 	private void initTheme() {

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.pstar.webfetcher.web.judicial.fjud.model.Judical;
+import org.pstar.webfetcher.web.judicial.fjud.model.Judicial;
 
 public interface FJUDCtrlTaskImpl {
 	public HashMap<String, String> getFetchParameters();
@@ -25,5 +25,5 @@ public interface FJUDCtrlTaskImpl {
 
 	public void setCookies(Map<String, String> cookies);
 
-	public void addRecord(Judical record);
+	public void addRecord(Judicial record);
 }

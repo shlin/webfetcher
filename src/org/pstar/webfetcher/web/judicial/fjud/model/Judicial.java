@@ -1,8 +1,13 @@
 package org.pstar.webfetcher.web.judicial.fjud.model;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class Judical {
+public class Judicial {
 
 	private String uuid;
 	private String court;
@@ -19,11 +24,11 @@ public class Judical {
 	 * @param judTitle
 	 * @param content
 	 */
-	public Judical(String court, String date, String judId, String judTitle, String content) {
+	public Judicial(String court, String date, String judId, String judTitle, String content) {
 		super();
 		this.category = "刑事";
 		this.court = court;
-		this.date = date;
+		this.date = date.trim();
 		this.judId = judId;
 		this.judTitle = judTitle;
 		this.content = content;
@@ -77,6 +82,24 @@ public class Judical {
 	 */
 	public String getDate() {
 		return date;
+	}
+
+	public String getGeneralDate() {
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Pattern p = Pattern.compile("(\\d{1,3})(\\d{2})(\\d{2})$");
+		Matcher m = p.matcher(this.date);
+
+		if (m.find()) {
+			try {
+				cal.setTime(sdf.parse(String.format("%s-%s-%s", m.group(1), m.group(2), m.group(3))));
+				cal.add(Calendar.YEAR, 1911);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return sdf.format(cal.getTime());
 	}
 
 	/**
