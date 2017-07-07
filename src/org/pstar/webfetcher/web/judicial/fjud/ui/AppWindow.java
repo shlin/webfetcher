@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -22,9 +21,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -233,50 +235,22 @@ public class AppWindow {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setBounds(100, 100, 800, 750);
 		frame.getContentPane()
-				.setLayout(new FormLayout(new ColumnSpec[] {
-				ColumnSpec.decode("5px"),
-				ColumnSpec.decode("right:150px"),
-				ColumnSpec.decode("left:200px"),
-				ColumnSpec.decode("5px"),
-				ColumnSpec.decode("400px:grow"),
-				ColumnSpec.decode("5px"),},
-			new RowSpec[] {
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				RowSpec.decode("100px:grow"),
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,}));
+				.setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("5px"),
+						ColumnSpec.decode("right:150px"), ColumnSpec.decode("left:200px"), ColumnSpec.decode("5px"),
+						ColumnSpec.decode("400px:grow"), ColumnSpec.decode("5px"), },
+						new RowSpec[] { FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
+								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
+								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
+								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
+								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
+								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
+								FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, RowSpec.decode("100px:grow"),
+								FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
+								FormSpecs.DEFAULT_ROWSPEC, }));
 
 		JLabel lblOutputType = new JLabel("輸出方式：");
 		frame.getContentPane().add(lblOutputType, "2, 2");
@@ -308,7 +282,16 @@ public class AppWindow {
 		panel.add(rdbtnMysql);
 
 		listFJUDList = new JList<String>();
-		frame.getContentPane().add(listFJUDList, "5, 2, 1, 17, fill, fill");
+		listFJUDList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		frame.getContentPane().add(new JScrollPane(listFJUDList), "5, 2, 1, 17, fill, fill");
+		listFJUDList.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting()) {
+					fjudFormListener.doPaintShowContent();
+				}
+			}
+		});
 
 		JLabel lblSQLFile = new JLabel("SQL輸出檔：");
 		frame.getContentPane().add(lblSQLFile, "2, 4");
@@ -392,7 +375,9 @@ public class AppWindow {
 		txtFJUDTitleExclude.setColumns(10);
 
 		txtFJUDContent = new JTextPane();
-		frame.getContentPane().add(txtFJUDContent, "5, 20, 1, 15, fill, fill");
+		txtFJUDContent.setEditable(false);
+
+		frame.getContentPane().add(new JScrollPane(txtFJUDContent), "5, 20, 1, 15, fill, fill");
 
 		JLabel lblFulltextKeyword = new JLabel("全文檢索語詞：");
 		frame.getContentPane().add(lblFulltextKeyword, "2, 22, right, default");
@@ -435,8 +420,7 @@ public class AppWindow {
 		jListCourt = new CheckBoxList();
 		jListCourt.setModel(this.fjudFormListener.getCourtListModel());
 
-		JScrollPane courtListScrollPane = new JScrollPane(jListCourt);
-		frame.getContentPane().add(courtListScrollPane, "2, 32, 2, 1, fill, fill");
+		frame.getContentPane().add(new JScrollPane(jListCourt), "2, 32, 2, 1, fill, fill");
 
 		btnStop = new JButton("停止");
 		btnStop.setEnabled(false);
@@ -464,26 +448,24 @@ public class AppWindow {
 			}
 		});
 		frame.getContentPane().add(btnStart, "3, 34");
-		
+
 		JLabel label = new JLabel("完成進度（法院）：");
 		frame.getContentPane().add(label, "2, 36");
 
 		progressBarCourts = new JProgressBar();
 		progressBarCourts.setStringPainted(true);
-		frame.getContentPane().add(progressBarCourts, "3, 36, fill, center");
-		
+		frame.getContentPane().add(progressBarCourts, "3, 36, 3, 1, fill, center");
+
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new EmptyBorder(0, 0, 0, 0));
-		frame.getContentPane().add(panel_1, "5, 36, fill, fill");
-		panel_1.setLayout(new FormLayout(new ColumnSpec[] {
-				ColumnSpec.decode("right:200px"),
-				ColumnSpec.decode("left:default:grow"),},
-			new RowSpec[] {
-				FormSpecs.DEFAULT_ROWSPEC,}));
-		
+		// frame.getContentPane().add(panel_1, "5, 36, fill, fill");
+		panel_1.setLayout(new FormLayout(
+				new ColumnSpec[] { ColumnSpec.decode("right:200px"), ColumnSpec.decode("left:default:grow"), },
+				new RowSpec[] { FormSpecs.DEFAULT_ROWSPEC, }));
+
 		JLabel lblProgressBarDocs = new JLabel("完成進度（單一法院裁判書）：");
 		panel_1.add(lblProgressBarDocs, "1, 1");
-		
+
 		progressBarDocs = new JProgressBar();
 		progressBarDocs.setStringPainted(true);
 		panel_1.add(progressBarDocs, "2, 1, fill, default");
