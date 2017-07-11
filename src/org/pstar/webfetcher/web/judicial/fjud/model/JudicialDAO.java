@@ -9,10 +9,6 @@ public class JudicialDAO {
 	private MySQLConnectorImpl mysql;
 	private String tableName;
 
-	public JudicialDAO(String table) {
-		this.tableName = table;
-	}
-
 	/**
 	 * @param mysql
 	 * @param table
@@ -20,6 +16,37 @@ public class JudicialDAO {
 	public JudicialDAO(MySQLConnectorImpl mysql, String table) {
 		this.mysql = mysql;
 		this.tableName = table;
+	}
+
+	public JudicialDAO(String table) {
+		this.tableName = table;
+	}
+
+	public void createTable() {
+		try {
+			Statement stmt = this.mysql.getConnection().createStatement();
+			stmt.executeUpdate(this.sqlCreateTable());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String createTableToFile() {
+		return this.sqlCreateTable();
+	}
+
+	public String saveDataToFile(Judicial data) {
+		return this.sqlInsert(data);
+	}
+
+	public void saveDataToMySQL(Judicial data) {
+		try {
+			Statement stmt = this.mysql.getConnection().createStatement();
+			stmt.executeUpdate(this.sqlInsert(data));
+		} catch (SQLException e) {
+			if (!e.getMessage().toLowerCase().contains("duplicate"))
+				e.printStackTrace();
+		}
 	}
 
 	private String sqlCreateTable() {
@@ -40,32 +67,5 @@ public class JudicialDAO {
 				this.tableName, data.getCourt(), data.getGeneralDate(), data.getJudId(), data.getJudTitle(),
 				data.getContent());
 		return sql;
-	}
-
-	public void createTable() {
-		try {
-			Statement stmt = this.mysql.getConnection().createStatement();
-			int rows = stmt.executeUpdate(this.sqlCreateTable());
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public String createTableToFile() {
-		return this.sqlCreateTable();
-	}
-
-	public String saveDataToFile(Judicial data) {
-		return this.sqlInsert(data);
-	}
-
-	public void saveDataToMySQL(Judicial data) {
-		try {
-			Statement stmt = this.mysql.getConnection().createStatement();
-			int rows = stmt.executeUpdate(this.sqlInsert(data));
-		} catch (SQLException e) {
-			if (!e.getMessage().toLowerCase().contains("duplicate"))
-				e.printStackTrace();
-		}
 	}
 }

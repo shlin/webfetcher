@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.pstar.webfetcher.web.judicial.fjud.model.Judicial;
 
@@ -19,13 +20,11 @@ public class FJUDFetchTask extends Thread {
 		this.totalCount = 0;
 	}
 
-	public void stopTask() {
-		this.enable = false;
-		// this.interrupt();
-	}
+	private void doFetchTotalCount(Document doc) {
+		String strTotalSrc = doc.select("span:contains(筆 / 現在第)").text();
+		String strTotal = strTotalSrc.replace("共", "").replaceAll("筆.+?$", "").trim();
 
-	public void sleep() throws InterruptedException {
-		Thread.sleep(this.fjudFetchCtrl.getFetchTimeIntervel());
+		this.totalCount = Integer.parseInt(strTotal);
 	}
 
 	@Override
@@ -45,17 +44,16 @@ public class FJUDFetchTask extends Thread {
 							courtConn.data("v_court", court);
 							courtConn.data("id", String.format("%d", i));
 
-							Elements table = courtConn.get().select("td#jfull");
+							Document doc = courtConn.get();
+							Elements table = doc.select("td#jfull");
 
 							if (table.isEmpty())
 								break;
 
-							// result data
-							// System.out.println(table.parents().select("td>span:contains(【裁判字號】)").text());
-							// System.out.println(table.parents().select("td>span:contains(【裁判日期】)").text());
-							// System.out.println(table.parents().select("td>span:contains(【裁判案由】)").text());
-							// System.out.println(table.text());
+							// fetch total count
+							this.doFetchTotalCount(doc);
 
+							// result data
 							String date = table.parents().select("td>span:contains(【裁判日期】)").text()
 									.replaceAll("【裁判日期】", "").trim();
 							String judId = table.parents().select("td>span:contains(【裁判字號】)").text()
@@ -65,7 +63,8 @@ public class FJUDFetchTask extends Thread {
 							String content = String.format("【裁判字號】 %s\n【裁判日期】 %s\n【裁判案由】 %s\n【裁判全文】\n%s", judId, date,
 									judTitle, table.text());
 
-							this.fjudFetchCtrl.addRecord(new Judicial(court, date, judId, judTitle, content));
+							this.fjudFetchCtrl
+									.addRecord(new Judicial(court, date, judId, judTitle, content, this.totalCount));
 
 							this.sleep();
 						} else
@@ -82,18 +81,11 @@ public class FJUDFetchTask extends Thread {
 		this.fjudFetchCtrl.doFinishTask();
 	}
 
-	// private void doFetchTotalCount(String court) {
-	// try {
-	// Connection conn = Jsoup.connect(this.fjudFetchCtrl.getCourtReferrer());
-	// Document doc;
-	//
-	// conn.cookies(this.fjudFetchCtrl.getCookies());
-	// conn.referrer(this.fjudFetchCtrl.getReferrer());
-	// conn.data(this.fjudFetchCtrl.getFetchParameters());
-	//
-	// doc = conn.get();
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// }
-	// }
+	public void sleep() throws InterruptedException {
+		Thread.sleep(this.fjudFetchCtrl.getFetchTimeIntervel());
+	}
+
+	public void stopTask() {
+		this.enable = false;
+	}
 }

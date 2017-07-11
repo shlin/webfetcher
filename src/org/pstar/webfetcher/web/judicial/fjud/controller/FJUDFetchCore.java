@@ -3,6 +3,7 @@ package org.pstar.webfetcher.web.judicial.fjud.controller;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,15 +23,16 @@ import org.pstar.webfetcher.web.judicial.fjud.ui.CheckBoxListEntry;
 
 public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUDCtrlTaskImpl {
 	private AppWindow appWindow;
-	private ResourceBundle resource;
-	private FJUDFetchTask currentThread;
 	private HashMap<String, String> cookies;
-	private HashMap<String, Judicial> recordMap;
-	private DefaultListModel<String> recordListModel;
-	private MySQLConnector mysql;
+	private FJUDFetchTask currentThread;
 	private JudicialDAO judicialDAO;
-	private boolean outputMySQL;
+	private MySQLConnector mysql;
 	private PrintStream outputFile;
+	private boolean outputMySQL;
+	private DefaultListModel<String> recordListModel;
+	private HashMap<String, Judicial> recordMap;
+	private ResourceBundle resource;
+	private HashSet<String> titleExecludeSet;
 
 	public FJUDFetchCore() {
 		this.initResource();
@@ -38,50 +40,29 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 		SwingUtilities.invokeLater(() -> this.appWindow = new AppWindow(this));
 	}
 
-	private void initResource() {
-		this.cookies = new HashMap<String, String>();
-		this.resource = ResourceBundle.getBundle("org.pstar.webfetcher.web.judicial.fjud.config");
-	}
+	@Override
+	public void addRecord(Judicial record) {
+		boolean toBeSave = this.titleExecludeSet.stream().filter(kw -> record.getJudTitle().contains(kw)).count() == 0;
+		int currentProgress = this.appWindow.getProgressBarDocs().getValue();
 
-	private void initMySQL() {
-		String host = this.appWindow.getTxtMySQLHost().getText().trim();
-		String user = this.appWindow.getTxtMySQLUser().getText().trim();
-		String password = String.valueOf(this.appWindow.getTxtMySQLPassword().getPassword()).trim();
-		String database = this.appWindow.getTxtDatabaseName().getText().trim();
-		String table = this.appWindow.getTxtTableName().getText().trim();
+		// for (String titleExeclude : this.titleExecludeSet) {
+		// if (toBeSave)
+		// toBeSave = !record.getJudTitle().contains(titleExeclude);
+		// }
 
-		this.mysql = new MySQLConnector(host, user, password, database);
-		this.judicialDAO = new JudicialDAO(this.mysql, table);
-		this.judicialDAO.createTable();
-	}
+		if (toBeSave) {
+			this.recordMap.put(record.getUUID(), record);
+			this.recordListModel.addElement(record.getSummary());
+			this.appWindow.getListFJUDList().setModel(this.recordListModel);
 
-	private void initFile() {
-		try {
-			String table = this.appWindow.getTxtTableName().getText().trim();
-			this.judicialDAO = new JudicialDAO(table);
-			this.outputFile = new PrintStream(new FileOutputStream(this.appWindow.getTxtFilePath().getText()));
-			this.outputFile.println(this.judicialDAO.createTableToFile());
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			if (this.outputMySQL)
+				this.judicialDAO.saveDataToMySQL(record);
+			else
+				this.outputFile.println(this.judicialDAO.saveDataToFile(record));
 		}
-	}
 
-	@Override
-	public void doFetch() {
-		if (this.outputMySQL)
-			this.initMySQL();
-		else
-			this.initFile();
-
-		this.recordMap = new HashMap<String, Judicial>();
-		this.recordListModel = new DefaultListModel<String>();
-		this.currentThread = new FJUDFetchTask(this);
-		this.currentThread.start();
-	}
-
-	@Override
-	public void doStop() {
-		this.currentThread.stopTask();
+		this.appWindow.getProgressBarDocs().setMaximum(record.getTotal());
+		this.appWindow.getProgressBarDocs().setValue(currentProgress + 1);
 	}
 
 	@Override
@@ -93,6 +74,70 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 		this.appWindow.getTxtMySQLUser().setEnabled(type);
 		this.appWindow.getTxtMySQLPassword().setEnabled(type);
 		this.appWindow.getTxtDatabaseName().setEnabled(type);
+	}
+
+	@Override
+	public void doFetch() {
+		this.titleExecludeSet = new HashSet<String>();
+		this.recordMap = new HashMap<String, Judicial>();
+		this.recordListModel = new DefaultListModel<String>();
+		this.currentThread = new FJUDFetchTask(this);
+
+		if (this.outputMySQL)
+			this.initMySQL();
+		else
+			this.initFile();
+
+		Arrays.asList(this.appWindow.getTxtFJUDTitleExclude().getText().split("\\s"))
+				.forEach(title -> this.titleExecludeSet.add(title));
+
+		this.currentThread.start();
+	}
+
+	@Override
+	public void doFinishOneCourt() {
+		int total = this.appWindow.getjListCourt().getCheckedItems().size();
+		int currentProgress = this.appWindow.getProgressBar().getValue();
+
+		this.appWindow.getProgressBar().setMaximum(total);
+		this.appWindow.getProgressBar().setValue(currentProgress + 1);
+	}
+
+	@Override
+	public void doFinishTask() {
+		this.appWindow.getBtnStart().setEnabled(true);
+		this.appWindow.getBtnStop().setEnabled(false);
+	}
+
+	@Override
+	public void doPaintShowContent() {
+		String selectedVal = this.appWindow.getListFJUDList().getSelectedValue();
+
+		if (selectedVal != null) {
+			String key = UUID.nameUUIDFromBytes(selectedVal.getBytes()).toString();
+			this.appWindow.getTxtFJUDContent().setText(this.recordMap.get(key).getContent());
+		}
+	}
+
+	@Override
+	public void doStop() {
+		this.currentThread.stopTask();
+	}
+
+	@Override
+	public HashMap<String, String> getCookies() {
+		return this.cookies;
+	}
+
+	@Override
+	public HashSet<String> getCourtList() {
+		HashSet<String> selectedCourt = new HashSet<String>();
+
+		this.appWindow.getjListCourt().getCheckedItems().forEach(court -> {
+			selectedCourt.add(court.getText());
+		});
+
+		return selectedCourt;
 	}
 
 	@Override
@@ -131,66 +176,41 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 	}
 
 	@Override
-	public HashMap<String, String> getCookies() {
-		return this.cookies;
+	public String getReferrer() {
+		return "http://jirs.judicial.gov.tw/FJUD/FJUDQRY02_1.aspx";
+	}
+
+	private void initFile() {
+		try {
+			String table = this.appWindow.getTxtTableName().getText().trim();
+			this.judicialDAO = new JudicialDAO(table);
+			this.outputFile = new PrintStream(new FileOutputStream(this.appWindow.getTxtFilePath().getText()));
+			this.outputFile.println(this.judicialDAO.createTableToFile());
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void initMySQL() {
+		String host = this.appWindow.getTxtMySQLHost().getText().trim();
+		String user = this.appWindow.getTxtMySQLUser().getText().trim();
+		String password = String.valueOf(this.appWindow.getTxtMySQLPassword().getPassword()).trim();
+		String database = this.appWindow.getTxtDatabaseName().getText().trim();
+		String table = this.appWindow.getTxtTableName().getText().trim();
+
+		this.mysql = new MySQLConnector(host, user, password, database);
+		this.judicialDAO = new JudicialDAO(this.mysql, table);
+		this.judicialDAO.createTable();
+	}
+
+	private void initResource() {
+		this.outputMySQL = true;
+		this.cookies = new HashMap<String, String>();
+		this.resource = ResourceBundle.getBundle("org.pstar.webfetcher.web.judicial.fjud.config");
 	}
 
 	@Override
 	public void setCookies(Map<String, String> cookies) {
 		cookies.forEach((k, v) -> this.cookies.put(k, v));
-	}
-
-	@Override
-	public HashSet<String> getCourtList() {
-		HashSet<String> selectedCourt = new HashSet<String>();
-
-		this.appWindow.getjListCourt().getCheckedItems().forEach(court -> {
-			selectedCourt.add(court.getText());
-		});
-
-		return selectedCourt;
-	}
-
-	@Override
-	public String getReferrer() {
-		return "http://jirs.judicial.gov.tw/FJUD/FJUDQRY02_1.aspx";
-	}
-
-	@Override
-	public void doFinishTask() {
-		this.appWindow.getBtnStart().setEnabled(true);
-		this.appWindow.getBtnStop().setEnabled(false);
-	}
-
-	@Override
-	public void addRecord(Judicial record) {
-		this.recordMap.put(record.getUUID(), record);
-		this.recordListModel.addElement(record.getSummary());
-		this.appWindow.getListFJUDList().setModel(this.recordListModel);
-
-		if (this.outputMySQL)
-			this.judicialDAO.saveDataToMySQL(record);
-		else {
-			this.outputFile.println(this.judicialDAO.saveDataToFile(record));
-		}
-	}
-
-	@Override
-	public void doPaintShowContent() {
-		String selectedVal = this.appWindow.getListFJUDList().getSelectedValue();
-
-		if (selectedVal != null) {
-			String key = UUID.nameUUIDFromBytes(selectedVal.getBytes()).toString();
-			this.appWindow.getTxtFJUDContent().setText(this.recordMap.get(key).getContent());
-		}
-	}
-
-	@Override
-	public void doFinishOneCourt() {
-		int total = this.appWindow.getjListCourt().getCheckedItems().size();
-		int currentProgress = this.appWindow.getProgressBar().getValue();
-
-		this.appWindow.getProgressBar().setMaximum(total);
-		this.appWindow.getProgressBar().setValue(currentProgress + 1);
 	}
 }

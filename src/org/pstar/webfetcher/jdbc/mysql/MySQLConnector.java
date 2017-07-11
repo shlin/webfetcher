@@ -7,11 +7,11 @@ import java.sql.SQLException;
 public class MySQLConnector implements MySQLConnectorImpl {
 	private Connection conn;
 
-	private String strHost;
-	private String strUsername;
-	private String strPassword;
-	private String strDatabase;
 	private String strConnectionUrl;
+	private String strDatabase;
+	private String strHost;
+	private String strPassword;
+	private String strUsername;
 
 	/**
 	 * @param host
@@ -26,6 +26,20 @@ public class MySQLConnector implements MySQLConnectorImpl {
 		this.strDatabase = database;
 	}
 
+	@Override
+	public Connection getConnection() {
+		if (this.conn == null)
+			this.initConnection();
+		return this.conn;
+	}
+
+	/**
+	 * @return the strDatabase
+	 */
+	public String getStrDatabase() {
+		return strDatabase;
+	}
+
 	/**
 	 * @return the strHost
 	 */
@@ -38,22 +52,6 @@ public class MySQLConnector implements MySQLConnectorImpl {
 	 */
 	public String getStrUsername() {
 		return strUsername;
-	}
-
-	/**
-	 * @return the strDatabase
-	 */
-	public String getStrDatabase() {
-		return strDatabase;
-	}
-
-	private void initDriver() {
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException e) {
-			System.err.println("找不到JDBC驅動程式類別");
-			e.printStackTrace();
-		}
 	}
 
 	private void initConnection() {
@@ -71,11 +69,13 @@ public class MySQLConnector implements MySQLConnectorImpl {
 		}
 	}
 
-	@Override
-	public Connection getConnection() {
-		if (this.conn == null)
-			this.initConnection();
-		return this.conn;
+	private void initDriver() {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			System.err.println("找不到JDBC驅動程式類別");
+			e.printStackTrace();
+		}
 	}
 
 }

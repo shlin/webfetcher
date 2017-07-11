@@ -10,11 +10,11 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 public class CheckboxCellRenderer extends DefaultListCellRenderer {
+	protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 411056466860099398L;
-	protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 
 	@Override
 	public Component getListCellRendererComponent(JList<? extends Object> list, Object value, int index,

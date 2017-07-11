@@ -7,23 +7,23 @@ import java.util.Map;
 import org.pstar.webfetcher.web.judicial.fjud.model.Judicial;
 
 public interface FJUDCtrlTaskImpl {
-	public HashMap<String, String> getFetchParameters();
-
-	public HashSet<String> getCourtList();
-
-	public void doFinishTask();
+	public void addRecord(Judicial record);
 
 	public void doFinishOneCourt();
 
-	public String getReferrer();
+	public void doFinishTask();
+
+	public HashMap<String, String> getCookies();
+
+	public HashSet<String> getCourtList();
+
+	public HashMap<String, String> getFetchParameters();
 
 	public long getFetchTimeIntervel();
 
 	public int getIntFetchTimeIntervel();
 
-	public HashMap<String, String> getCookies();
+	public String getReferrer();
 
 	public void setCookies(Map<String, String> cookies);
-
-	public void addRecord(Judicial record);
 }

@@ -14,9 +14,9 @@ public interface FJUDCtrlViewerImpl {
 
 	public void doFetch();
 
-	public void doStop();
-	
 	public void doPaintShowContent();
+	
+	public void doStop();
 
 	public DefaultListModel<CheckBoxListEntry> getCourtListModel();
 }

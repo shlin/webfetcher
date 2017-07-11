@@ -9,13 +9,14 @@ import java.util.regex.Pattern;
 
 public class Judicial {
 
-	private String uuid;
-	private String court;
 	private String category;
+	private String content;
+	private String court;
 	private String date;
 	private String judId;
 	private String judTitle;
-	private String content;
+	private int total;
+	private String uuid;
 
 	/**
 	 * @param court
@@ -23,43 +24,18 @@ public class Judicial {
 	 * @param judId
 	 * @param judTitle
 	 * @param content
+	 * @param total
 	 */
-	public Judicial(String court, String date, String judId, String judTitle, String content) {
+	public Judicial(String court, String date, String judId, String judTitle, String content, int total) {
 		super();
 		this.category = "刑事";
 		this.court = court;
-		this.date = date.trim();
-		this.judId = judId;
-		this.judTitle = judTitle;
+		this.date = date.replaceAll(" ", "");
+		this.judId = judId.replaceAll(" ", "");
+		this.judTitle = judTitle.replaceAll(" ", "");
 		this.content = content;
-
+		this.total = total;
 		this.uuid = UUID.nameUUIDFromBytes(this.getSummary().getBytes()).toString();
-	}
-
-	public String getSummary() {
-		return String.format("%s %s %s", court, judId, judTitle);
-	}
-
-	/**
-	 * @return the uuid
-	 */
-	public String getUUID() {
-		return uuid;
-	}
-
-	/**
-	 * @return the court
-	 */
-	public String getCourt() {
-		return court;
-	}
-
-	/**
-	 * @param court
-	 *            the court to set
-	 */
-	public void setCourt(String court) {
-		this.court = court;
 	}
 
 	/**
@@ -70,11 +46,17 @@ public class Judicial {
 	}
 
 	/**
-	 * @param category
-	 *            the category to set
+	 * @return the content
 	 */
-	public void setCategory(String category) {
-		this.category = category;
+	public String getContent() {
+		return content;
+	}
+
+	/**
+	 * @return the court
+	 */
+	public String getCourt() {
+		return court;
 	}
 
 	/**
@@ -103,18 +85,67 @@ public class Judicial {
 	}
 
 	/**
+	 * @return the judId
+	 */
+	public String getJudId() {
+		return judId;
+	}
+
+	/**
+	 * @return the judTitle
+	 */
+	public String getJudTitle() {
+		return judTitle;
+	}
+
+	public String getSummary() {
+		return String.format("%s %s %s", court, judId, judTitle);
+	}
+
+	/**
+	 * @return the total
+	 */
+	public int getTotal() {
+		return total;
+	}
+
+	/**
+	 * @return the uuid
+	 */
+	public String getUUID() {
+		return uuid;
+	}
+
+	/**
+	 * @param category
+	 *            the category to set
+	 */
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	/**
+	 * @param content
+	 *            the content to set
+	 */
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	/**
+	 * @param court
+	 *            the court to set
+	 */
+	public void setCourt(String court) {
+		this.court = court;
+	}
+
+	/**
 	 * @param date
 	 *            the date to set
 	 */
 	public void setDate(String date) {
 		this.date = date;
-	}
-
-	/**
-	 * @return the judId
-	 */
-	public String getJudId() {
-		return judId;
 	}
 
 	/**
@@ -126,13 +157,6 @@ public class Judicial {
 	}
 
 	/**
-	 * @return the judTitle
-	 */
-	public String getJudTitle() {
-		return judTitle;
-	}
-
-	/**
 	 * @param judTitle
 	 *            the judTitle to set
 	 */
@@ -141,18 +165,10 @@ public class Judicial {
 	}
 
 	/**
-	 * @return the content
+	 * @param total the total to set
 	 */
-	public String getContent() {
-		return content;
-	}
-
-	/**
-	 * @param content
-	 *            the content to set
-	 */
-	public void setContent(String content) {
-		this.content = content;
+	public void setTotal(int total) {
+		this.total = total;
 	}
 
 }

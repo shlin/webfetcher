@@ -20,18 +20,20 @@ public class FJUDInitFetchTask implements Runnable {
 
 	@Override
 	public void run() {
-		try {
-			Connection conn = Jsoup.connect("http://jirs.judicial.gov.tw/FJUD/FJUDQRY01M_1.aspx");
-			Response respon;
+		for (int i = 0; i < 2; i++)
+			try {
+				Connection conn = Jsoup.connect("http://jirs.judicial.gov.tw/FJUD/FJUDQRY01M_1.aspx");
+				Response respon;
 
-			conn.method(Method.GET);
+				conn.method(Method.GET);
 
-			respon = conn.execute();
-			this.fjudFetchCtrl.setCookies(respon.cookies());
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+				respon = conn.execute();
+				this.fjudFetchCtrl.setCookies(respon.cookies());
+				break;
+			} catch (IOException e) {
+				if (i >= 2)
+					e.printStackTrace();
+			}
 	}
 
 }

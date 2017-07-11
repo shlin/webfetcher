@@ -42,18 +42,20 @@ import com.jgoodies.forms.layout.RowSpec;
 
 public class AppWindow {
 	private JButton btnChoiceFile;
-	private JFileChooser fc;
+	private ButtonGroup btnGOutputType;
 	private JButton btnStart;
 	private JButton btnStop;
 	private JDatePickerImpl dateEndPicker;
 	private Properties datePickerProperties;
 	private JDatePickerImpl dateStartPicker;
+	private JFileChooser fc;
 	private FJUDCtrlViewerImpl fjudFormListener;
 	private JFrame frame;
 	private CheckBoxList jListCourt;
 	private JLabel lblFJUDTitleExclude;
 	private JList<String> listFJUDList;
 	private JProgressBar progressBarCourts;
+	private JProgressBar progressBarDocs;
 	private JSpinner spinnerFetchTimeInterval;
 	private JTextField txtDatabaseName;
 	private JTextField txtFilePath;
@@ -65,8 +67,6 @@ public class AppWindow {
 	private JPasswordField txtMySQLPassword;
 	private JTextField txtMySQLUser;
 	private JTextField txtTableName;
-	private JProgressBar progressBarDocs;
-	private ButtonGroup btnGOutputType;
 
 	/**
 	 * Create the application.
@@ -85,6 +85,13 @@ public class AppWindow {
 	 */
 	public JButton getBtnChoiceFile() {
 		return btnChoiceFile;
+	}
+
+	/**
+	 * @return the btnGOutputType
+	 */
+	public ButtonGroup getBtnGOutputType() {
+		return btnGOutputType;
 	}
 
 	/**
@@ -141,6 +148,13 @@ public class AppWindow {
 	 */
 	public JProgressBar getProgressBar() {
 		return progressBarCourts;
+	}
+
+	/**
+	 * @return the progressBarDocs
+	 */
+	public JProgressBar getProgressBarDocs() {
+		return progressBarDocs;
 	}
 
 	/**
@@ -468,11 +482,11 @@ public class AppWindow {
 
 		progressBarCourts = new JProgressBar();
 		progressBarCourts.setStringPainted(true);
-		frame.getContentPane().add(progressBarCourts, "3, 36, 3, 1, fill, center");
+		frame.getContentPane().add(progressBarCourts, "3, 36, fill, center");
 
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new EmptyBorder(0, 0, 0, 0));
-		// frame.getContentPane().add(panel_1, "5, 36, fill, fill");
+		frame.getContentPane().add(panel_1, "5, 36, fill, fill");
 		panel_1.setLayout(new FormLayout(
 				new ColumnSpec[] { ColumnSpec.decode("right:200px"), ColumnSpec.decode("left:default:grow"), },
 				new RowSpec[] { FormSpecs.DEFAULT_ROWSPEC, }));
@@ -481,15 +495,9 @@ public class AppWindow {
 		panel_1.add(lblProgressBarDocs, "1, 1");
 
 		progressBarDocs = new JProgressBar();
+		progressBarDocs.setMaximum(500);
 		progressBarDocs.setStringPainted(true);
 		panel_1.add(progressBarDocs, "2, 1, fill, default");
-	}
-
-	/**
-	 * @return the btnGOutputType
-	 */
-	public ButtonGroup getBtnGOutputType() {
-		return btnGOutputType;
 	}
 
 	private void initTheme() {
