@@ -3,7 +3,6 @@ package org.pstar.webfetcher.web.judicial.fjud.controller;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -45,11 +44,6 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 		boolean toBeSave = this.titleExecludeSet.stream().filter(kw -> record.getJudTitle().contains(kw)).count() == 0;
 		int currentProgress = this.appWindow.getProgressBarDocs().getValue();
 
-		// for (String titleExeclude : this.titleExecludeSet) {
-		// if (toBeSave)
-		// toBeSave = !record.getJudTitle().contains(titleExeclude);
-		// }
-
 		if (toBeSave) {
 			this.recordMap.put(record.getUUID(), record);
 			this.recordListModel.addElement(record.getSummary());
@@ -78,6 +72,7 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 
 	@Override
 	public void doFetch() {
+		String strTitleExeclude = this.appWindow.getTxtFJUDTitleExclude().getText().trim();
 		this.titleExecludeSet = new HashSet<String>();
 		this.recordMap = new HashMap<String, Judicial>();
 		this.recordListModel = new DefaultListModel<String>();
@@ -88,9 +83,12 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 		else
 			this.initFile();
 
-		Arrays.asList(this.appWindow.getTxtFJUDTitleExclude().getText().split("\\s"))
-				.forEach(title -> this.titleExecludeSet.add(title));
+		if (!strTitleExeclude.isEmpty())
+			for (String strKw : strTitleExeclude.split("\\s"))
+				this.titleExecludeSet.add(strKw);
 
+		this.appWindow.getProgressBar().setValue(0);
+		this.appWindow.getProgressBarDocs().setValue(0);
 		this.currentThread.start();
 	}
 

@@ -30,9 +30,9 @@ public class Judicial {
 		super();
 		this.category = "刑事";
 		this.court = court;
-		this.date = date.replaceAll(" ", "");
-		this.judId = judId.replaceAll(" ", "");
-		this.judTitle = judTitle.replaceAll(" ", "");
+		this.date = date.replaceAll("\\u00A0", "");
+		this.judId = judId.replaceAll("\\u00A0", "");
+		this.judTitle = judTitle.replaceAll("\\u00A0", "");
 		this.content = content;
 		this.total = total;
 		this.uuid = UUID.nameUUIDFromBytes(this.getSummary().getBytes()).toString();
@@ -165,7 +165,8 @@ public class Judicial {
 	}
 
 	/**
-	 * @param total the total to set
+	 * @param total
+	 *            the total to set
 	 */
 	public void setTotal(int total) {
 		this.total = total;
