@@ -81,12 +81,13 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 		if (this.outputMySQL)
 			this.initMySQL();
 		else
-			this.initFile();
+			this.initFile();		
 
 		if (!strTitleExeclude.isEmpty())
 			for (String strKw : strTitleExeclude.split("\\s"))
 				this.titleExecludeSet.add(strKw);
 
+		this.titleExecludeSet.add("附帶民訴");
 		this.appWindow.getProgressBar().setValue(0);
 		this.appWindow.getProgressBarDocs().setValue(0);
 		this.currentThread.start();
