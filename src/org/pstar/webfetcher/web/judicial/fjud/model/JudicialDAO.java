@@ -1,13 +1,18 @@
 package org.pstar.webfetcher.web.judicial.fjud.model;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import org.pstar.webfetcher.jdbc.mysql.MySQLConnectorImpl;
 
 public class JudicialDAO {
+	private HashMap<String, Judicial> fullTable;
 	private MySQLConnectorImpl mysql;
+	private HashSet<Integer> removeSet;
 	private String tableName;
 
 	/**
@@ -17,7 +22,8 @@ public class JudicialDAO {
 	public JudicialDAO(MySQLConnectorImpl mysql, String table) {
 		this.mysql = mysql;
 		this.tableName = table;
-
+		this.fullTable = new HashMap<String, Judicial>();
+		this.removeSet = new HashSet<Integer>();
 		this.initMySQL();
 	}
 
@@ -38,21 +44,41 @@ public class JudicialDAO {
 		return this.sqlCreateTable();
 	}
 
-	private void doDataDeduplication() {
+	private void doRemoveData(String table, int id) {
 		try {
+			String sql = String.format("DELETE FROM `%s` WHERE `id` = '%d';", table, id);
 			Statement stmt = this.mysql.getConnection().createStatement();
-			stmt.executeUpdate(this.sqlDropTable("tmpTable"));
-			stmt.executeUpdate(this.sqlCreateTable("tmpTable"));
-			stmt.executeUpdate(this.sqlCloneUniqueDataToTable("tmpTable"));
-			stmt.executeUpdate(this.sqlDropTable(this.tableName));
-			stmt.executeUpdate(this.sqlRenameTable("tmpTable", this.tableName));
+
+			stmt.executeUpdate(sql);
+			stmt.close();
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
+	// private void doDataDeduplication() {
+	// try {
+	// Statement stmt = this.mysql.getConnection().createStatement();
+	// stmt.executeUpdate(this.sqlDropTable("tmpTable"));
+	// stmt.executeUpdate(this.sqlCreateTable("tmpTable"));
+	// stmt.executeUpdate(this.sqlCloneUniqueDataToTable("tmpTable"));
+	// stmt.executeUpdate(this.sqlDropTable(this.tableName));
+	// stmt.executeUpdate(this.sqlRenameTable("tmpTable", this.tableName));
+	// } catch (SQLException e) {
+	// e.printStackTrace();
+	// }
+	// }
+
+	/**
+	 * @return the fullTable
+	 */
+	public HashMap<String, Judicial> getFullTable() {
+		return fullTable;
+	}
+
 	private void initMySQL() {
-		int fullTotal = 0, uniqueTotal = 0;
+		// int fullTotal = 0, uniqueTotal = 0;
 		ResultSet rs;
 		Statement stmt;
 
@@ -61,15 +87,26 @@ public class JudicialDAO {
 			stmt.executeUpdate(this.sqlCleanData());
 
 			rs = stmt.executeQuery(this.sqlSelectAllData());
-			fullTotal = rs.last() ? rs.getRow() : 0;
+			while (rs.next()) {
+				int dataId = rs.getInt("id");
+				String court = rs.getString("court");
+				String date = rs.getDate("date").toString();
+				String jud_id = rs.getString("jud_id");
+				String jud_title = rs.getString("jud_title");
+				String content = rs.getString("content");
 
-			rs = stmt.executeQuery(this.sqlSelectUniqueData());
-			uniqueTotal = rs.last() ? rs.getRow() : 0;
+				Judicial currentRow = new Judicial(court, date, jud_id, jud_title, content, 0);
 
-			if (fullTotal > uniqueTotal)
-				this.doDataDeduplication();
-
+				if (!this.fullTable.containsKey(currentRow.getUUID())) {
+					this.fullTable.put(currentRow.getUUID(), currentRow);
+				} else {
+					this.removeSet.add(dataId);
+				}
+			}
 			stmt.close();
+
+			this.removeSet.forEach(id -> this.doRemoveData(this.tableName, id));
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -82,8 +119,10 @@ public class JudicialDAO {
 
 	public void saveDataToMySQL(Judicial data) {
 		try {
-			Statement stmt = this.mysql.getConnection().createStatement();
-			stmt.executeUpdate(this.sqlInsert(data));
+			if (!this.fullTable.containsKey(data.getUUID())) {
+				Statement stmt = this.mysql.getConnection().createStatement();
+				stmt.executeUpdate(this.sqlInsert(data));
+			}
 		} catch (SQLException e) {
 			if (!e.getMessage().toLowerCase().contains("duplicate"))
 				e.printStackTrace();
@@ -96,35 +135,12 @@ public class JudicialDAO {
 		return sql;
 	}
 
-	private String sqlCloneUniqueDataToTable(String table) {
-		String sql = String.format("INSERT INTO `%s` SELECT * FROM `%s` WHERE 1 GROUP BY `date`,`jud_id`;", table,
-				this.tableName);
-		return sql;
-	}
-
-	private String sqlSelectAllData() {
-		return this.sqlSelectAllData(this.tableName);
-	}
-
-	private String sqlSelectAllData(String table) {
-		String sql = String.format("SELECT * FROM `%s`;", table);
-		return sql;
-	}
-
-	private String sqlSelectUniqueData() {
-		String sql = String.format("SELECT * FROM `%s` WHERE 1 GROUP BY `date`,`jud_id`;", this.tableName);
-		return sql;
-	}
-
-	private String sqlRenameTable(String oldTable, String newTable) {
-		String sql = String.format("RENAME TABLE `%s` TO `%s`", oldTable, newTable);
-		return sql;
-	}
-
-	private String sqlDropTable(String table) {
-		String sql = String.format("DROP TABLE `%s`;", table);
-		return sql;
-	}
+	// private String sqlCloneUniqueDataToTable(String table) {
+	// String sql = String.format("INSERT INTO `%s` SELECT * FROM `%s` WHERE 1
+	// GROUP BY `date`,`jud_id`;", table,
+	// this.tableName);
+	// return sql;
+	// }
 
 	private String sqlCreateTable() {
 		return this.sqlCreateTable(this.tableName);
@@ -142,11 +158,37 @@ public class JudicialDAO {
 		return sql;
 	}
 
+	// private String sqlSelectUniqueData() {
+	// String sql = String.format("SELECT * FROM `%s` WHERE 1 GROUP BY
+	// `date`,`jud_id`;", this.tableName);
+	// return sql;
+	// }
+
+	// private String sqlRenameTable(String oldTable, String newTable) {
+	// String sql = String.format("RENAME TABLE `%s` TO `%s`", oldTable,
+	// newTable);
+	// return sql;
+	// }
+
+	// private String sqlDropTable(String table) {
+	// String sql = String.format("DROP TABLE `%s`;", table);
+	// return sql;
+	// }
+
 	private String sqlInsert(Judicial data) {
 		String sql = String.format(
 				"INSERT INTO `%s`(`court`, `date`, `jud_id`, `jud_title`, `content`) VALUES('%s','%s','%s','%s','%s');",
 				this.tableName, data.getCourt(), data.getGeneralDate(), data.getJudId(), data.getJudTitle(),
 				data.getContent());
+		return sql;
+	}
+
+	private String sqlSelectAllData() {
+		return this.sqlSelectAllData(this.tableName);
+	}
+
+	private String sqlSelectAllData(String table) {
+		String sql = String.format("SELECT * FROM `%s`;", table);
 		return sql;
 	}
 }
