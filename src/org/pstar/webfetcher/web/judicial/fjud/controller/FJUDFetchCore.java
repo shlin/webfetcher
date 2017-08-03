@@ -81,7 +81,7 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 		if (this.outputMySQL)
 			this.initMySQL();
 		else
-			this.initFile();		
+			this.initFile();
 
 		if (!strTitleExeclude.isEmpty())
 			for (String strKw : strTitleExeclude.split("\\s"))
@@ -98,8 +98,13 @@ public class FJUDFetchCore extends FetchCore implements FJUDCtrlViewerImpl, FJUD
 		int total = this.appWindow.getjListCourt().getCheckedItems().size();
 		int currentProgress = this.appWindow.getProgressBar().getValue();
 
+		this.judicialDAO.doDataDeduplication();
+
 		this.appWindow.getProgressBar().setMaximum(total);
 		this.appWindow.getProgressBar().setValue(currentProgress + 1);
+
+		this.appWindow.getProgressBarDocs().setValue(0);
+		this.appWindow.getProgressBarDocs().setMaximum(500);
 	}
 
 	@Override
